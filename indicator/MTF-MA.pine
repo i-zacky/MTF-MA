@@ -1,0 +1,32 @@
+// @version=6
+indicator(title = "Multi Time Frame Moving Average", shorttitle = "MTF MA", overlay = true)
+
+// 短期MA : デフォルト20SMA
+shortMA_length = input.int(defval = 20, title = "期間", group = "短期")
+shortMA_source = input.source(defval = close, title = "ソース", group = "短期")
+shortMA = ta.sma(source = shortMA_source, length = shortMA_length)
+plot(series = shortMA, title = "短期", color = color.white, linewidth = 2)
+
+// 中期MA : デフォルト75SMA
+middleMA_length = input.int(defval = 75, title = "期間", group = "中期")
+middleMA_source = input.source(defval = close, title = "ソース", group = "中期")
+middleMA = ta.sma(source = middleMA_source, length = middleMA_length)
+plot(series = middleMA, title = "中期", color = color.orange, linewidth = 2)
+
+// 長期MA : デフォルト200SMA
+longMA_length = input.int(defval = 200, title = "期間", group = "長期")
+longMA_source = input.source(defval = close, title = "ソース", group = "長期")
+longMA = ta.sma(source = longMA_source, length = longMA_length)
+plot(series = longMA, title = "長期", color = color.green, linewidth = 2)
+
+// 超長期 : 日足20SMA（ステップライン） & 週足20SMA（ステップライン）
+float _1D_SMA = na
+float _1W_SMA = na
+
+if (timeframe.period != "1D" or timeframe.period != "1W")
+    _1D_SMA := request.security(syminfo.tickerid, "D", ta.sma(source = close, length = 20))
+    _1W_SMA := request.security(syminfo.tickerid, "W", ta.sma(source = close, length = 20))
+
+plot(series = _1D_SMA, title = "超長期（日足20SMA）", color = color.maroon, linewidth = 2, style = plot.style_stepline)
+plot(series = _1W_SMA, title = "超長期（週足20SMA）", color = color.purple, linewidth = 2, style = plot.style_stepline)
+
