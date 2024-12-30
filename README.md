@@ -1,8 +1,17 @@
-# MTF-MA
+# TradingView Scripts
 
-Multi Time Frame Moving Average for TradingView
+Indicator & Strategy for TradingView
 
 ## Overview
 
-![image](./docs/images/README-top-image.png)
+### [MTF-MA](./indicator/MTF-MA.pine)
 
+Multi Time Frame Moving Average
+
+![image](./docs/images/README-MTF-MA.png)
+
+### [SuperTrend Strategy v6](./strategy/SuperTrend-Strategy-v6.pine)
+
+SuperTrend Strategy (PineScript v6)
+
+![image](./docs/images/README-SuperTrend-Strategy-v6.png)

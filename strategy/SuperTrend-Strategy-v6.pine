@@ -1,0 +1,66 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © isaac0423
+
+//@version=6
+strategy(title = "SuperTrend Strategy v6", overlay = true)
+
+// paramters (for indicator)
+var atr_configuration_group = "ATR Configuration"
+periods = input.int(title = "ATR Period", defval = 10, group = atr_configuration_group)
+source = input.source(title = "Source", defval = hl2, group = atr_configuration_group)
+multiplier = input.float(title = "ATR Multiplier", defval = 3.0, group = atr_configuration_group)
+change_atr = input.bool(title = "Change ATR Calculation Method ?", defval = true, group = atr_configuration_group)
+
+var decoration_options = "Options"
+show_signals = input.bool(title = "Show Buy/Sell Signals ?", defval = false, group = decoration_options)
+highlighting = input.bool(title = "Highlighter On/Off ?", defval = false, group = decoration_options)
+bar_coloring = input.bool(title = "Bar Coloring On/Off ?", defval = false, group = decoration_options)
+
+// calculate ATR
+default_atr = ta.sma(ta.tr, periods)
+atr = change_atr ? ta.atr(periods) : default_atr
+
+// evaluate trend
+up = source - (multiplier * atr)
+up1 = nz(up[1], up)
+up := close[1] > up1 ? math.max(up, up1) : up
+down = source + (multiplier * atr)
+down1 = nz(down[1], down)
+down := close[1] < down1 ? math.min(down, down1) : down
+
+trend = 1
+trend := nz(trend[1], trend)
+trend := trend == -1 and close > down1 ? 1 : trend == 1 and close < up1 ? -1 : trend
+
+// display signals
+up_plot = plot(series = trend == 1 ? up : na, title = "Up Trend", style = plot.style_linebr, linewidth = 2, color = color.green)
+buy_signal = trend == 1 and trend[1] == -1
+plotshape(series = buy_signal ? up : na, title = "Up Trend Begins", location = location.absolute, style = shape.circle, size = size.tiny, color = color.green)
+plotshape(series = buy_signal and show_signals ? up : na, title = "Buy", location = location.absolute, style = shape.labelup, size = size.tiny, color = color.green, text = "Buy", textcolor = color.white)
+
+down_plot = plot(series = trend == 1 ? na : down, title = "Down Trend", style = plot.style_linebr, linewidth = 2, color = color.red)
+sell_signal = trend == -1 and trend[1] == 1
+plotshape(series = sell_signal ? down : na, title = "Down Trend Begins", location = location.absolute, style = shape.circle, size = size.tiny, color = color.red)
+plotshape(series = sell_signal and show_signals ? down : na, title = "Sell", location = location.absolute, style = shape.labeldown, size = size.tiny, color = color.red, text = "Sell", textcolor = color.white)
+
+// highlighting
+m_plot = plot(series = ohlc4, title = "", style = plot.style_circles, display = display.none, editable = false)
+long_fill_color = highlighting and trend == 1 ? color.new(color.green, 90) : na
+short_fill_color = highlighting and trend == -1 ? color.new(color.red, 90) : na
+fill(plot1 = m_plot, plot2 = up_plot, title = "Up Trend Highlighter", color = long_fill_color)
+fill(plot1 = m_plot, plot2 = down_plot, title = "Down Trend Highlighter", color = short_fill_color)
+
+// parameters (for strategy)
+var strategy_period_group = "Strategy Period"
+strategy_from = input.time(title = "From", defval = timestamp("2018-01-01"), group = strategy_period_group)
+strategy_to = input.time(title = "To", defval = timestamp("2099-12-31"), group = strategy_period_group)
+
+if (buy_signal)
+    strategy.entry(id = "BUY", direction = strategy.long)
+if (sell_signal)
+    strategy.entry(id = "SELL", direction = strategy.short)
+
+buy1 = ta.barssince(buy_signal)
+sell1 = ta.barssince(sell_signal)
+color1 = buy1[1] < sell1[1] ? color.green : buy1[1] > sell1[1] ? color.red : na
+barcolor(bar_coloring ? color1 : na)

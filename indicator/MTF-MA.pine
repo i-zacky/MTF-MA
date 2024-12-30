@@ -1,3 +1,6 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © isaac0423
+
 // @version=6
 indicator(title = "Multi Time Frame Moving Average", shorttitle = "MTF MA", overlay = true)
 
